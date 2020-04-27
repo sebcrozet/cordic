@@ -1,0 +1,11 @@
+[package]
+name = "table-builder"
+version = "0.1.0"
+authors = ["crunchyfrog <alex@crunchy.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+num = "0.2.1"
+fixed = "0.5"
