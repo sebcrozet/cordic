@@ -18,6 +18,23 @@ fn build_cordic_atan_table(num_entries: u8) -> Vec<u64> {
     table
 }
 
+// NOTE: we generate exp(x) - 1.0 instead of exp(x) directly
+// so that the results can fit into a U0F64 like all our other
+// CORDIC lookup tables.
+fn build_cordic_exp_minus_one_table(num_entries: u8) -> Vec<u64> {
+    let mut table = Vec::with_capacity(num_entries as usize);
+    let mut angle = 0.5f64;
+
+    for _ in 0..num_entries {
+        let exp = angle.exp();
+        let ival = U0F64::from_num(exp - 1.0);
+        table.push(ival.to_bits());
+        angle = angle * 0.5;
+    }
+
+    table
+}
+
 fn build_cordic_cumprod_table(num_entries: u8) -> Vec<u64> {
     let mut table = Vec::with_capacity(num_entries as usize);
     let mut cumprod = 1.0f64;
@@ -94,7 +111,7 @@ fn print_usage(error: Option<&str>) {
         eprintln!("Error: {}", error);
     }
     println!(
-        "usage: table-builder {{sin|asin|cordic-atan|cordic-cumprod}} num_bits table_filepath"
+        "usage: table-builder {{sin|asin|cordic-atan|cordic-exp-minus-one|cordic-cumprod}} num_bits table_filepath"
     );
 }
 
@@ -122,6 +139,11 @@ fn main() {
         }
         "cordic-atan" => {
             let table = build_cordic_atan_table(num);
+            let data = vec_u64_to_le_bytes(table);
+            write_table(args[3].as_str(), None, data);
+        }
+        "cordic-exp-minus-one" => {
+            let table = build_cordic_exp_minus_one_table(num);
             let data = vec_u64_to_le_bytes(table);
             write_table(args[3].as_str(), None, data);
         }

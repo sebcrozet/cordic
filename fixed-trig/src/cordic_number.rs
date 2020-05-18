@@ -3,7 +3,7 @@ use fixed::types::extra::{
 };
 use fixed::types::U0F64;
 use fixed::{FixedI16, FixedI32, FixedI64, FixedI8};
-use std::ops::{Add, AddAssign, BitXor, Div, Mul, MulAssign, Neg, Shl, Shr, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, Mul, Neg, Shl, Shr, Sub, SubAssign};
 
 pub trait CordicNumber:
     Copy
@@ -18,10 +18,15 @@ pub trait CordicNumber:
     + Shr<u8, Output = Self>
     + Shl<u8, Output = Self>
 {
+    fn floor(self) -> Self;
     fn zero() -> Self;
     fn one() -> Self;
+    fn half() -> Self {
+        Self::one() >> 1
+    }
     fn frac_pi_2() -> Self;
     fn pi() -> Self;
+    fn e() -> Self;
     fn from_u0f64(val: U0F64) -> Self;
     fn num_fract_bits() -> u8;
 }
@@ -37,6 +42,11 @@ where
         + IsLessOrEqual<U6, Output = True>
         + IsLessOrEqual<U5, Output = True>,
 {
+    #[inline(always)]
+    fn floor(self) -> Self {
+        self.floor()
+    }
+
     #[inline(always)]
     fn zero() -> Self {
         Self::from_bits(0)
@@ -55,6 +65,11 @@ where
     #[inline(always)]
     fn pi() -> Self {
         Self::PI
+    }
+
+    #[inline(always)]
+    fn e() -> Self {
+        Self::E
     }
 
     #[inline(always)]
@@ -76,6 +91,11 @@ where
         + IsLessOrEqual<U29, Output = True>,
 {
     #[inline(always)]
+    fn floor(self) -> Self {
+        self.floor()
+    }
+
+    #[inline(always)]
     fn zero() -> Self {
         Self::from_bits(0)
     }
@@ -93,6 +113,11 @@ where
     #[inline(always)]
     fn pi() -> Self {
         Self::PI
+    }
+
+    #[inline(always)]
+    fn e() -> Self {
+        Self::E
     }
 
     #[inline(always)]
@@ -114,6 +139,11 @@ where
         + IsLessOrEqual<U13, Output = True>,
 {
     #[inline(always)]
+    fn floor(self) -> Self {
+        self.floor()
+    }
+
+    #[inline(always)]
     fn zero() -> Self {
         Self::from_bits(0)
     }
@@ -131,6 +161,11 @@ where
     #[inline(always)]
     fn pi() -> Self {
         Self::PI
+    }
+
+    #[inline(always)]
+    fn e() -> Self {
+        Self::E
     }
 
     #[inline(always)]
@@ -152,6 +187,11 @@ where
         + IsLessOrEqual<U61, Output = True>,
 {
     #[inline(always)]
+    fn floor(self) -> Self {
+        self.floor()
+    }
+
+    #[inline(always)]
     fn zero() -> Self {
         Self::from_bits(0)
     }
@@ -169,6 +209,11 @@ where
     #[inline(always)]
     fn pi() -> Self {
         Self::PI
+    }
+
+    #[inline(always)]
+    fn e() -> Self {
+        Self::E
     }
 
     #[inline(always)]

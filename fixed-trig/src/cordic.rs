@@ -4,12 +4,14 @@ use fixed::types::U0F64;
 use std::convert::TryInto;
 
 const ATAN_TABLE: &[u8] = include_bytes!("tables/cordic_atan.table");
+const EXP_MINUS_ONE_TABLE: &[u8] = include_bytes!("tables/cordic_exp_minus_one.table");
 
 fn lookup_table(table: &[u8], index: u8) -> U0F64 {
     let i = index as usize * 8;
     U0F64::from_bits(u64::from_le_bytes(table[i..(i + 8)].try_into().unwrap()))
 }
 
+// See cordit1 from http://www.voidware.com/cordic.htm
 pub fn cordic_circular<T: CordicNumber>(mut x: T, mut y: T, mut z: T, vecmode: T) -> (T, T, T) {
     let _0 = T::zero();
     let _2 = T::one() + T::one();
@@ -127,6 +129,58 @@ pub fn atan2<T: CordicNumber>(y: T, x: T) -> T {
     }
 }
 
+pub fn exp<T: CordicNumber>(x: T) -> T {
+    assert!(
+        T::num_fract_bits() <= 128,
+        "Exp is not supported for more than 128 decimals."
+    );
+    let _0 = T::zero();
+    let _1 = T::one();
+    let _3 = T::one() + T::one() + T::one();
+    let mut int_part = x.floor();
+    let mut dec_part = x - int_part;
+    let mut poweroftwo = T::half();
+    let mut w = [false; 128];
+
+    for i in 0..T::num_fract_bits() {
+        if poweroftwo < dec_part {
+            w[i as usize] = true;
+            dec_part -= poweroftwo;
+        }
+
+        poweroftwo = poweroftwo >> 1;
+    }
+
+    let mut fx = _1;
+
+    for i in 0..T::num_fract_bits() {
+        if w[i as usize] {
+            let ai = T::from_u0f64(lookup_table(EXP_MINUS_ONE_TABLE, i)) + T::one();
+            fx = fx * ai;
+        }
+    }
+
+    let f4 = _1 + (dec_part >> 2);
+    let f3 = _1 + (dec_part / _3) * f4;
+    let f2 = _1 + (dec_part >> 1) * f3;
+    let f1 = _1 + dec_part * f2;
+    fx = fx * f1;
+
+    if int_part < _0 {
+        while int_part != _0 {
+            fx = fx / T::e();
+            int_part += _1;
+        }
+    } else {
+        while int_part != _0 {
+            fx = fx * T::e();
+            int_part -= _1;
+        }
+    }
+
+    fx
+}
+
 // FIXME: this should be contributed to the fixed-sqrt crate instead of remaining here.
 pub fn sqrt<T: CordicNumber>(x: T, niters: usize) -> T {
     if x == T::zero() || x == T::one() {
@@ -135,7 +189,7 @@ pub fn sqrt<T: CordicNumber>(x: T, niters: usize) -> T {
 
     // FIXME: optimize with bitshifts
     let mut pow2 = T::one();
-    let mut result = T::zero();
+    let mut result;
 
     if x < T::one() {
         while x <= pow2 * pow2 {
@@ -248,6 +302,15 @@ mod tests {
             let x = I48F16::from_bits(i);
             let fx: f64 = x.to_num();
             assert_approx_eq(x, sqrt(x, 40).to_num(), fx.sqrt(), 0.01);
+        }
+    }
+
+    #[test]
+    fn test_exp() {
+        for i in 0..(1 << 18) {
+            let x = I48F16::from_bits(i);
+            let fx: f64 = x.to_num();
+            assert_approx_eq(x, exp(x).to_num(), fx.exp(), 0.01);
         }
     }
 }
