@@ -29,6 +29,7 @@ pub trait CordicNumber:
     fn e() -> Self;
     fn from_u0f64(val: U0F64) -> Self;
     fn num_fract_bits() -> u8;
+    fn num_bits() -> u8;
 }
 
 // The IsLessOrEqual constraints are for (in order):
@@ -81,6 +82,11 @@ where
     fn num_fract_bits() -> u8 {
         Fract::to_u8()
     }
+
+    #[inline(always)]
+    fn num_bits() -> u8 {
+        8
+    }
 }
 
 impl<Fract> CordicNumber for FixedI32<Fract>
@@ -128,6 +134,11 @@ where
     #[inline(always)]
     fn num_fract_bits() -> u8 {
         Fract::to_u8()
+    }
+
+    #[inline(always)]
+    fn num_bits() -> u8 {
+        32
     }
 }
 
@@ -177,6 +188,11 @@ where
     fn num_fract_bits() -> u8 {
         Fract::to_u8()
     }
+
+    #[inline(always)]
+    fn num_bits() -> u8 {
+        16
+    }
 }
 
 impl<Fract> CordicNumber for FixedI64<Fract>
@@ -224,5 +240,10 @@ where
     #[inline(always)]
     fn num_fract_bits() -> u8 {
         Fract::to_u8()
+    }
+
+    #[inline(always)]
+    fn num_bits() -> u8 {
+        64
     }
 }
