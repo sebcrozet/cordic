@@ -184,13 +184,11 @@ pub fn exp<T: CordicNumber>(x: T) -> T {
     fx
 }
 
-// FIXME: this should be contributed to the fixed-sqrt crate instead of remaining here.
 pub fn sqrt<T: CordicNumber>(x: T) -> T {
     if x == T::zero() || x == T::one() {
         return x;
     }
 
-    // FIXME: optimize with bitshifts
     let mut pow2 = T::one();
     let mut result;
 
