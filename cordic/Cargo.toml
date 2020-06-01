@@ -1,7 +1,7 @@
 [package]
-name = "fixed-trig"
+name = "cordic"
 version = "0.1.0"
-description = "Trigonometric functions for fixed-point numbers."
+description = "Special functions for fixed-point numbers using the CORDIC method."
 authors = ["crunchyfrog <alex@crunchy.com>", "sebcrozet <developer@crozet.re>"]
 license = "BSD-3-Clause"
 edition = "2018"

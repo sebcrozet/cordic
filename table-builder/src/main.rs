@@ -1,5 +1,4 @@
 use fixed::types::U0F64;
-use num::{Bounded, FromPrimitive, ToPrimitive};
 use std::fs::File;
 use std::io::Write;
 use std::{env, process};
@@ -35,58 +34,6 @@ fn build_cordic_exp_minus_one_table(num_entries: u8) -> Vec<u64> {
     table
 }
 
-fn build_cordic_cumprod_table(num_entries: u8) -> Vec<u64> {
-    let mut table = Vec::with_capacity(num_entries as usize);
-    let mut cumprod = 1.0f64;
-    let mut pow = 1.0f64;
-
-    for _ in 0..num_entries {
-        cumprod /= (1.0 + pow).sqrt();
-        let ival = U0F64::from_num(cumprod);
-        table.push(ival.to_bits());
-        pow *= 0.25;
-    }
-
-    table
-}
-
-fn build_sin_table<T: Bounded + ToPrimitive + FromPrimitive + std::fmt::Display>(
-    num_bits: u8,
-) -> Vec<T> {
-    let num: u32 = 1 << num_bits;
-    let mut table = Vec::with_capacity((num + 1) as usize);
-    for i in 0..(num + 1) {
-        let angle = (std::f64::consts::FRAC_PI_2 * f64::from(i)) / f64::from(num);
-        let val = (angle.sin() * T::max_value().to_f64().unwrap()).round();
-        let ival = T::from_f64(val).unwrap();
-        table.push(ival);
-    }
-    table
-}
-
-fn build_asin_table<T: Bounded + ToPrimitive + FromPrimitive + std::fmt::Display>(
-    num_bits: u8,
-) -> Vec<T> {
-    let num: u32 = 1 << num_bits;
-    let mut table = Vec::with_capacity((num + 1) as usize);
-    for i in 0..num {
-        let val = f64::from(i) / f64::from(num);
-        let angle =
-            ((val.asin() * T::max_value().to_f64().unwrap()) / std::f64::consts::FRAC_PI_2).round();
-        let ival = T::from_f64(angle).unwrap();
-        table.push(ival);
-    }
-    table.push(T::max_value());
-    table
-}
-
-fn vec_u16_to_le_bytes(data: Vec<u16>) -> Vec<u8> {
-    let mut bytes = vec![];
-    data.into_iter()
-        .for_each(|d| bytes.extend(&d.to_le_bytes()));
-    bytes
-}
-
 fn vec_u64_to_le_bytes(data: Vec<u64>) -> Vec<u8> {
     let mut bytes = vec![];
     data.into_iter()
@@ -111,7 +58,7 @@ fn print_usage(error: Option<&str>) {
         eprintln!("Error: {}", error);
     }
     println!(
-        "usage: table-builder {{sin|asin|cordic-atan|cordic-exp-minus-one|cordic-cumprod}} num_bits table_filepath"
+        "usage: table-builder {{cordic-atan|cordic-exp-minus-one|cordic-cumprod}} num_bits table_filepath"
     );
 }
 
@@ -127,16 +74,6 @@ fn main() {
     }
     let num = args[2].parse::<u8>().expect("unable to parse num_bits");
     match args[1].as_str() {
-        "sin" => {
-            let table = build_sin_table::<u16>(num as u8);
-            let data = vec_u16_to_le_bytes(table);
-            write_table(args[3].as_str(), Some(num), data);
-        }
-        "asin" => {
-            let table = build_asin_table::<u16>(num as u8);
-            let data = vec_u16_to_le_bytes(table);
-            write_table(args[3].as_str(), Some(num), data);
-        }
         "cordic-atan" => {
             let table = build_cordic_atan_table(num);
             let data = vec_u64_to_le_bytes(table);
@@ -144,11 +81,6 @@ fn main() {
         }
         "cordic-exp-minus-one" => {
             let table = build_cordic_exp_minus_one_table(num);
-            let data = vec_u64_to_le_bytes(table);
-            write_table(args[3].as_str(), None, data);
-        }
-        "cordic-cumprod" => {
-            let table = build_cordic_cumprod_table(num);
             let data = vec_u64_to_le_bytes(table);
             write_table(args[3].as_str(), None, data);
         }
