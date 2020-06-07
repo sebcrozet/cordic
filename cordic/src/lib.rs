@@ -104,7 +104,7 @@ pub fn asin<T: CordicNumber>(mut val: T) -> T {
     theta
 }
 
-/// /// Compute the arc-cosine of the given fixed-point number.
+/// Compute the arc-cosine of the given fixed-point number.
 pub fn acos<T: CordicNumber>(val: T) -> T {
     T::frac_pi_2() - asin(val)
 }
