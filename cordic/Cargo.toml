@@ -1,8 +1,10 @@
 [package]
 name = "cordic"
-version = "0.1.2"
+version = "0.1.3"
 description = "Special functions for fixed-point numbers using the CORDIC method."
-authors = ["crunchyfrog <alex@crunchy.com>", "sebcrozet <developer@crozet.re>"]
+authors = ["sebcrozet <developer@crozet.re>"]
+repository = "https://github.com/sebcrozet/cordic"
+documentation = "https://docs.rs/cordic"
 license = "BSD-3-Clause"
 edition = "2018"
 
