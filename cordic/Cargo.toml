@@ -1,6 +1,6 @@
 [package]
 name = "cordic"
-version = "0.1.1"
+version = "0.1.2"
 description = "Special functions for fixed-point numbers using the CORDIC method."
 authors = ["crunchyfrog <alex@crunchy.com>", "sebcrozet <developer@crozet.re>"]
 license = "BSD-3-Clause"
@@ -9,4 +9,4 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-fixed = "0.5"
+fixed = "1"
