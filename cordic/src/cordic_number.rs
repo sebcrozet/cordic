@@ -5,6 +5,10 @@ use fixed::types::U0F64;
 use fixed::{FixedI16, FixedI32, FixedI64, FixedI8};
 use std::ops::{Add, AddAssign, Div, Mul, Neg, Shl, Shr, Sub, SubAssign};
 
+/// A number that can be used by the CORDIC-based algorithms.
+///
+/// This covers most fixed-point numbers, with some restriction on the maximal number
+/// of decimal bits in order to allow some constraints (like PI) to fit.
 pub trait CordicNumber:
     Copy
     + PartialOrd

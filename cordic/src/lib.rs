@@ -15,7 +15,7 @@ fn lookup_table(table: &[u8], index: u8) -> U0F64 {
 }
 
 // See cordit1 from http://www.voidware.com/cordic.htm
-pub fn cordic_circular<T: CordicNumber>(mut x: T, mut y: T, mut z: T, vecmode: T) -> (T, T, T) {
+fn cordic_circular<T: CordicNumber>(mut x: T, mut y: T, mut z: T, vecmode: T) -> (T, T, T) {
     let _0 = T::zero();
     let _2 = T::one() + T::one();
 
@@ -36,10 +36,11 @@ pub fn cordic_circular<T: CordicNumber>(mut x: T, mut y: T, mut z: T, vecmode: T
     (x, y, z)
 }
 
-pub fn gain_cordic<T: CordicNumber>() -> T {
+fn gain_cordic<T: CordicNumber>() -> T {
     cordic_circular(T::one(), T::zero(), T::zero(), -T::one()).0
 }
 
+/// Compute simultaneously the sinus and cosine of the given fixed-point number.
 pub fn sin_cos<T: CordicNumber>(mut angle: T) -> (T, T) {
     let mut negative = false;
 
@@ -63,19 +64,23 @@ pub fn sin_cos<T: CordicNumber>(mut angle: T) -> (T, T) {
     }
 }
 
+/// Compute the sinus of the given fixed-point number.
 pub fn sin<T: CordicNumber>(angle: T) -> T {
     sin_cos(angle).0
 }
 
+/// Compute the cosinus of the given fixed-point number.
 pub fn cos<T: CordicNumber>(angle: T) -> T {
     sin_cos(angle).1
 }
 
+/// Compute the tangent of the given fixed-point number.
 pub fn tan<T: CordicNumber>(angle: T) -> T {
     let (sin, cos) = sin_cos(angle);
     sin / cos
 }
 
+/// Compute the arc-sinus of the given fixed-point number.
 pub fn asin<T: CordicNumber>(mut val: T) -> T {
     // For asin, we use a double-rotation approach to reduce errors.
     // NOTE: see https://stackoverflow.com/questions/25976656/cordic-arcsine-implementation-fails
@@ -99,14 +104,17 @@ pub fn asin<T: CordicNumber>(mut val: T) -> T {
     theta
 }
 
+/// /// Compute the arc-cosine of the given fixed-point number.
 pub fn acos<T: CordicNumber>(val: T) -> T {
     T::frac_pi_2() - asin(val)
 }
 
+/// Compute the arc-tangent of the given fixed-point number.
 pub fn atan<T: CordicNumber>(val: T) -> T {
     cordic_circular(T::one(), val, T::zero(), T::zero()).2
 }
 
+/// Compute the arc-tangent of `y/x` with quadrant correction.
 pub fn atan2<T: CordicNumber>(y: T, x: T) -> T {
     if x == T::zero() {
         if y < T::zero() {
@@ -132,6 +140,7 @@ pub fn atan2<T: CordicNumber>(y: T, x: T) -> T {
     }
 }
 
+/// Compute the exponential root of the given fixed-point number.
 pub fn exp<T: CordicNumber>(x: T) -> T {
     assert!(
         T::num_fract_bits() <= 128,
@@ -184,6 +193,7 @@ pub fn exp<T: CordicNumber>(x: T) -> T {
     fx
 }
 
+/// Compute the square root of the given fixed-point number.
 pub fn sqrt<T: CordicNumber>(x: T) -> T {
     if x == T::zero() || x == T::one() {
         return x;
