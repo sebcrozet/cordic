@@ -312,7 +312,7 @@ mod tests {
         for i in 0..(1 << 20) {
             let x = I48F16::from_bits(i);
             let fx: f64 = x.to_num();
-            assert_approx_eq(x, sqrt(x, 40).to_num(), fx.sqrt(), 0.01);
+            assert_approx_eq(x, sqrt(x).to_num(), fx.sqrt(), 0.01);
         }
     }
 
