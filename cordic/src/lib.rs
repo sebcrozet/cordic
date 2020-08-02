@@ -1,10 +1,17 @@
 //! Implementations of special functions based on the CORDIC algorithm.
 
+#![no_std]
+
+// Used to make the tests build and run.
+#[cfg(test)]
+#[macro_use]
+extern crate std;
+
 mod cordic_number;
 
 pub use cordic_number::CordicNumber;
 use fixed::types::U0F64;
-use std::convert::TryInto;
+use core::convert::TryInto;
 
 const ATAN_TABLE: &[u8] = include_bytes!("tables/cordic_atan.table");
 const EXP_MINUS_ONE_TABLE: &[u8] = include_bytes!("tables/cordic_exp_minus_one.table");
@@ -233,7 +240,7 @@ mod tests {
     use super::*;
     use fixed::types::I48F16;
 
-    fn assert_approx_eq<T: std::fmt::Display>(
+    fn assert_approx_eq<T: core::fmt::Display>(
         input: T,
         computed: f64,
         expected: f64,
