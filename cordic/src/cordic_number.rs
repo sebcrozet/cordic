@@ -3,7 +3,7 @@ use fixed::types::extra::{
 };
 use fixed::types::U0F64;
 use fixed::{FixedI16, FixedI32, FixedI64, FixedI8};
-use std::ops::{Add, AddAssign, Div, Mul, Neg, Shl, Shr, Sub, SubAssign};
+use core::ops::{Add, AddAssign, Div, Mul, Neg, Shl, Shr, Sub, SubAssign};
 
 /// A number that can be used by the CORDIC-based algorithms.
 ///
