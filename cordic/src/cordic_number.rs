@@ -42,7 +42,8 @@ pub trait CordicNumber:
 // - The PI constant.
 impl<Fract> CordicNumber for FixedI8<Fract>
 where
-    Fract: Unsigned
+    Fract: 'static
+        + Unsigned
         + IsLessOrEqual<U8, Output = True>
         + IsLessOrEqual<U6, Output = True>
         + IsLessOrEqual<U5, Output = True>,
@@ -95,7 +96,8 @@ where
 
 impl<Fract> CordicNumber for FixedI32<Fract>
 where
-    Fract: Unsigned
+    Fract: 'static
+        + Unsigned
         + IsLessOrEqual<U32, Output = True>
         + IsLessOrEqual<U30, Output = True>
         + IsLessOrEqual<U29, Output = True>,
@@ -148,7 +150,8 @@ where
 
 impl<Fract> CordicNumber for FixedI16<Fract>
 where
-    Fract: Unsigned
+    Fract: 'static
+        + Unsigned
         + IsLessOrEqual<U16, Output = True>
         + IsLessOrEqual<U14, Output = True>
         + IsLessOrEqual<U13, Output = True>,
@@ -201,7 +204,8 @@ where
 
 impl<Fract> CordicNumber for FixedI64<Fract>
 where
-    Fract: Unsigned
+    Fract: 'static
+        + Unsigned
         + IsLessOrEqual<U64, Output = True>
         + IsLessOrEqual<U62, Output = True>
         + IsLessOrEqual<U61, Output = True>,
