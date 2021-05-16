@@ -1,6 +1,6 @@
 [package]
 name = "cordic"
-version = "0.1.4"
+version = "0.1.5"
 description = "Special functions for fixed-point numbers using the CORDIC method."
 authors = ["sebcrozet <developer@crozet.re>"]
 repository = "https://github.com/sebcrozet/cordic"
