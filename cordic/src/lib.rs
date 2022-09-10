@@ -10,8 +10,8 @@ extern crate std;
 mod cordic_number;
 
 pub use cordic_number::CordicNumber;
-use fixed::types::U0F64;
 use core::convert::TryInto;
+use fixed::{traits::Fixed, types::U0F64};
 
 const ATAN_TABLE: &[u8] = include_bytes!("tables/cordic_atan.table");
 const EXP_MINUS_ONE_TABLE: &[u8] = include_bytes!("tables/cordic_exp_minus_one.table");
@@ -201,33 +201,42 @@ pub fn exp<T: CordicNumber>(x: T) -> T {
 }
 
 /// Compute the square root of the given fixed-point number.
-pub fn sqrt<T: CordicNumber>(x: T) -> T {
-    if x == T::zero() || x == T::one() {
+pub fn sqrt<T: CordicNumber + Fixed>(x: T) -> T {
+    if x == <T as CordicNumber>::zero() || x == T::one() {
         return x;
     }
 
     let mut pow2 = T::one();
     let mut result;
 
+    // Note: Checked multiplication is required on 'big' numbers because they can overflow on `pow2*pow2`.
     if x < T::one() {
         while x <= pow2 * pow2 {
-            pow2 = pow2 >> 1;
+            pow2 = pow2 >> 1u32;
         }
 
         result = pow2;
     } else {
         // x >= T::one()
-        while pow2 * pow2 <= x {
-            pow2 = pow2 << 1;
+        while if let Some(p) = pow2.checked_mul(pow2) {
+            p <= x
+        } else {
+            false
+        } {
+            pow2 = pow2 << 1u32;
         }
 
-        result = pow2 >> 1;
+        result = pow2 >> 1u32;
     }
 
     for _ in 0..T::num_bits() {
-        pow2 = pow2 >> 1;
+        pow2 = pow2 >> 1u32;
         let next_result = result + pow2;
-        if next_result * next_result <= x {
+        if if let Some(nr) = next_result.checked_mul(next_result) {
+            nr <= x
+        } else {
+            false
+        } {
             result = next_result;
         }
     }
