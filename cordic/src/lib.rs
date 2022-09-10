@@ -202,7 +202,7 @@ pub fn exp<T: CordicNumber>(x: T) -> T {
 
 /// Compute the square root of the given fixed-point number.
 pub fn sqrt<T: CordicNumber + Fixed>(x: T) -> T {
-    if x == T::zero() || x == T::one() {
+    if x == <T as CordicNumber>::zero() || x == T::one() {
         return x;
     }
 
