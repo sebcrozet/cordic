@@ -1,6 +1,6 @@
 //! Implementations of special functions based on the CORDIC algorithm.
 
-#![no_std]
+// #![no_std]
 
 // Used to make the tests build and run.
 #[cfg(test)]
@@ -10,8 +10,8 @@ extern crate std;
 mod cordic_number;
 
 pub use cordic_number::CordicNumber;
-use fixed::types::U0F64;
 use core::convert::TryInto;
+use fixed::{traits::Fixed, types::U0F64};
 
 const ATAN_TABLE: &[u8] = include_bytes!("tables/cordic_atan.table");
 const EXP_MINUS_ONE_TABLE: &[u8] = include_bytes!("tables/cordic_exp_minus_one.table");
@@ -201,7 +201,7 @@ pub fn exp<T: CordicNumber>(x: T) -> T {
 }
 
 /// Compute the square root of the given fixed-point number.
-pub fn sqrt<T: CordicNumber>(x: T) -> T {
+pub fn sqrt<T: CordicNumber + Fixed>(x: T) -> T {
     if x == T::zero() || x == T::one() {
         return x;
     }
@@ -209,30 +209,68 @@ pub fn sqrt<T: CordicNumber>(x: T) -> T {
     let mut pow2 = T::one();
     let mut result;
 
-    if x < T::one() {
-        while x <= pow2 * pow2 {
-            pow2 = pow2 >> 1;
+    // Checked multiplication is required on 'big' numbers because they can overflow on `pow2*pow2`.
+    //
+    // Note: if there is some way to make `T::MAX/2` a constant, it could improve perf probably
+    if x < T::MAX / T::from_num(2) {
+        if x < T::one() {
+            while x <= pow2 * pow2 {
+                pow2 = pow2 >> 1u32;
+            }
+
+            result = pow2;
+        } else {
+            // x >= T::one()
+            while pow2 * pow2 <= x {
+                pow2 = pow2 << 1u32;
+            }
+
+            result = pow2 >> 1u32;
         }
 
-        result = pow2;
+        for _ in 0..T::num_bits() {
+            pow2 = pow2 >> 1u32;
+            let next_result = result + pow2;
+            if next_result * next_result <= x {
+                result = next_result;
+            }
+        }
+
+        result
     } else {
-        // x >= T::one()
-        while pow2 * pow2 <= x {
-            pow2 = pow2 << 1;
+        if x < T::one() {
+            while x <= pow2 * pow2 {
+                pow2 = pow2 >> 1u32;
+            }
+
+            result = pow2;
+        } else {
+            // x >= T::one()
+            while if let Some(p) = pow2.checked_mul(pow2) {
+                p <= x
+            } else {
+                false
+            } {
+                pow2 = pow2 << 1u32;
+            }
+
+            result = pow2 >> 1u32;
         }
 
-        result = pow2 >> 1;
-    }
-
-    for _ in 0..T::num_bits() {
-        pow2 = pow2 >> 1;
-        let next_result = result + pow2;
-        if next_result * next_result <= x {
-            result = next_result;
+        for _ in 0..T::num_bits() {
+            pow2 = pow2 >> 1u32;
+            let next_result = result + pow2;
+            if if let Some(nr) = next_result.checked_mul(next_result) {
+                nr <= x
+            } else {
+                false
+            } {
+                result = next_result;
+            }
         }
-    }
 
-    result
+        result
+    }
 }
 
 #[cfg(test)]
