@@ -1,6 +1,6 @@
 //! Implementations of special functions based on the CORDIC algorithm.
 
-// #![no_std]
+#![no_std]
 
 // Used to make the tests build and run.
 #[cfg(test)]
@@ -209,68 +209,39 @@ pub fn sqrt<T: CordicNumber + Fixed>(x: T) -> T {
     let mut pow2 = T::one();
     let mut result;
 
-    // Checked multiplication is required on 'big' numbers because they can overflow on `pow2*pow2`.
-    //
-    // Note: if there is some way to make `T::MAX/2` a constant, it could improve perf probably
-    if x < T::MAX / T::from_num(2) {
-        if x < T::one() {
-            while x <= pow2 * pow2 {
-                pow2 = pow2 >> 1u32;
-            }
-
-            result = pow2;
-        } else {
-            // x >= T::one()
-            while pow2 * pow2 <= x {
-                pow2 = pow2 << 1u32;
-            }
-
-            result = pow2 >> 1u32;
-        }
-
-        for _ in 0..T::num_bits() {
+    // Note: Checked multiplication is required on 'big' numbers because they can overflow on `pow2*pow2`.
+    if x < T::one() {
+        while x <= pow2 * pow2 {
             pow2 = pow2 >> 1u32;
-            let next_result = result + pow2;
-            if next_result * next_result <= x {
-                result = next_result;
-            }
         }
 
-        result
+        result = pow2;
     } else {
-        if x < T::one() {
-            while x <= pow2 * pow2 {
-                pow2 = pow2 >> 1u32;
-            }
-
-            result = pow2;
+        // x >= T::one()
+        while if let Some(p) = pow2.checked_mul(pow2) {
+            p <= x
         } else {
-            // x >= T::one()
-            while if let Some(p) = pow2.checked_mul(pow2) {
-                p <= x
-            } else {
-                false
-            } {
-                pow2 = pow2 << 1u32;
-            }
-
-            result = pow2 >> 1u32;
+            false
+        } {
+            pow2 = pow2 << 1u32;
         }
 
-        for _ in 0..T::num_bits() {
-            pow2 = pow2 >> 1u32;
-            let next_result = result + pow2;
-            if if let Some(nr) = next_result.checked_mul(next_result) {
-                nr <= x
-            } else {
-                false
-            } {
-                result = next_result;
-            }
-        }
-
-        result
+        result = pow2 >> 1u32;
     }
+
+    for _ in 0..T::num_bits() {
+        pow2 = pow2 >> 1u32;
+        let next_result = result + pow2;
+        if if let Some(nr) = next_result.checked_mul(next_result) {
+            nr <= x
+        } else {
+            false
+        } {
+            result = next_result;
+        }
+    }
+
+    result
 }
 
 #[cfg(test)]
